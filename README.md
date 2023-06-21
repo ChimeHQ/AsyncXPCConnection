@@ -72,7 +72,7 @@ try await remote.withService { service in
 }
 
 try await remote.withErrorCompletion {service, handler in
-	service.errorMethod(reply: handler)
+    service.errorMethod(reply: handler)
 }
 
 _ = try await remote.withValueErrorCompletion { service, handler in
