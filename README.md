@@ -18,6 +18,7 @@ protocol XPCService {
     func valueAndErrorMethod(reply: (String?, Error?) -> Void)
     func dataAndErrorMethod(reply: (Data?, Error?) -> Void)
 }
+```
 
 You can use `NSXCPConnection` directly:
 
@@ -49,7 +50,7 @@ _ = try await conn.withValueErrorCompletion { (service: XPCService, handler) in
 }
 ```
 
-You can also make use of the `RemoteConnection` type, which will remove the need for explict typing.
+You can also make use of the `RemoteConnection` type, which will remove the need for explicit typing.
 
 ```swift
 let conn = NSXPCConnection()
