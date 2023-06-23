@@ -30,7 +30,7 @@ extension NSXPCConnection {
 	///
 	/// Even though the remote call does not return errors, this function still throws because communication can always fail.
 	@_unsafeInheritExecutor
-	func withService<Service>(
+	public func withService<Service>(
 		function: String = #function,
 		_ body: (Service) throws -> Void
 	) async throws {
@@ -53,7 +53,7 @@ extension NSXPCConnection {
 	@_unsafeInheritExecutor
 	public func withValueErrorCompletion<Service, Value>(
 		function: String = #function,
-		_ body: (Service, (Value?, Error?) -> Void) -> Void
+		_ body: (Service, @escaping (Value?, Error?) -> Void) -> Void
 	) async throws -> Value {
 		try await withContinuation { service, continuation in
 			body(service) { value, error in
@@ -75,7 +75,7 @@ extension NSXPCConnection {
 	@_unsafeInheritExecutor
 	public func withResultCompletion<Service, Value>(
 		function: String = #function,
-		_ body: (Service, (Result<Value, Error>) -> Void) -> Void
+		_ body: (Service, @escaping (Result<Value, Error>) -> Void) -> Void
 	) async throws -> Value {
 		try await withContinuation { service, continuation in
 			body(service) { result in
@@ -88,7 +88,7 @@ extension NSXPCConnection {
 	@_unsafeInheritExecutor
 	public func withErrorCompletion<Service>(
 		function: String = #function,
-		_ body: (Service, (Error?) -> Void) -> Void
+		_ body: (Service, @escaping (Error?) -> Void) -> Void
 	) async throws {
 		try await withContinuation { (service, continuation: CheckedContinuation<Void, Error>) in
 			body(service) { error in
@@ -100,38 +100,16 @@ extension NSXPCConnection {
 			}
 		}
 	}
-}
 
-@objc protocol XPCService {
-	func method()
-	func errorMethod(reply: (Error?) -> Void)
-	func valueAndErrorMethod(reply: (String?, Error?) -> Void)
-}
-
-func testFunc() async throws {
-	let conn = NSXPCConnection()
-	conn.remoteObjectInterface = NSXPCInterface(with: XPCService.self)
-
-	// access to the underlying continuation
-	try await conn.withContinuation { (service: XPCService, continuation: CheckedContinuation<Void, Error>) in
-		service.errorMethod() {
-			if let error = $0 {
-				continuation.resume(throwing: error)
-			} else {
-				continuation.resume()
-			}
+	@_unsafeInheritExecutor
+	public func withDecodedCompletion<Service, Value: Decodable>(
+		function: String = #function,
+		_ body: (Service, @escaping (Data?, Error?) -> Void) -> Void
+	) async throws -> Value {
+		let data: Data = try await withValueErrorCompletion { service, handler in
+			body(service, handler)
 		}
-	}
 
-	try await conn.withService { (service: XPCService) in
-		service.method()
-	}
-
-	try await conn.withErrorCompletion { (service: XPCService, handler) in
-		service.errorMethod(reply: handler)
-	}
-
-	_ = try await conn.withValueErrorCompletion { (service: XPCService, handler) in
-		service.valueAndErrorMethod(reply: handler)
+		return try JSONDecoder().decode(Value.self, from: data)
 	}
 }
