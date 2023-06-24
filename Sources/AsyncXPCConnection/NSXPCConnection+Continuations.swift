@@ -102,7 +102,7 @@ extension NSXPCConnection {
 	}
 
 	@_unsafeInheritExecutor
-	public func withDecodedCompletion<Service, Value: Decodable>(
+	public func withDecodingCompletion<Service, Value: Decodable>(
 		function: String = #function,
 		_ body: (Service, @escaping (Data?, Error?) -> Void) -> Void
 	) async throws -> Value {
