@@ -51,9 +51,9 @@ extension NSXPCConnection {
 	///
 	/// This function always throws if an error is returned from the completion handler.
 	@_unsafeInheritExecutor
-	public func withValueErrorCompletion<Service, Value>(
+	public func withValueErrorCompletion<Service, Value: Sendable>(
 		function: String = #function,
-		_ body: (Service, @escaping (Value?, Error?) -> Void) -> Void
+		_ body: (Service, @escaping @Sendable (Value?, Error?) -> Void) -> Void
 	) async throws -> Value {
 		try await withContinuation { service, continuation in
 			body(service) { value, error in
@@ -73,9 +73,9 @@ extension NSXPCConnection {
 
 	/// Begins remote method invocation that calls out to a Result-based completion handler.
 	@_unsafeInheritExecutor
-	public func withResultCompletion<Service, Value>(
+	public func withResultCompletion<Service, Value: Sendable>(
 		function: String = #function,
-		_ body: (Service, @escaping (Result<Value, Error>) -> Void) -> Void
+		_ body: (Service, @escaping @Sendable (Result<Value, Error>) -> Void) -> Void
 	) async throws -> Value {
 		try await withContinuation { service, continuation in
 			body(service) { result in
@@ -88,7 +88,7 @@ extension NSXPCConnection {
 	@_unsafeInheritExecutor
 	public func withErrorCompletion<Service>(
 		function: String = #function,
-		_ body: (Service, @escaping (Error?) -> Void) -> Void
+		_ body: (Service, @escaping @Sendable (Error?) -> Void) -> Void
 	) async throws {
 		try await withContinuation { (service, continuation: CheckedContinuation<Void, Error>) in
 			body(service) { error in
@@ -104,7 +104,7 @@ extension NSXPCConnection {
 	@_unsafeInheritExecutor
 	public func withDecodingCompletion<Service, Value: Decodable>(
 		function: String = #function,
-		_ body: (Service, @escaping (Data?, Error?) -> Void) -> Void
+		_ body: (Service, @escaping @Sendable (Data?, Error?) -> Void) -> Void
 	) async throws -> Value {
 		let data: Data = try await withValueErrorCompletion { service, handler in
 			body(service, handler)

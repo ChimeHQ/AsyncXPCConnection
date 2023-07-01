@@ -58,7 +58,7 @@ extension QueuedRemoteXPCService {
 
 	public func addErrorOperation(
 		barrier: Bool = false,
-		operation: @escaping (Service, @escaping (Error?) -> Void) -> Void
+		operation: @escaping (Service, @escaping @Sendable (Error?) -> Void) -> Void
 	) async throws {
 		let task: Task<Void, Error> = queue.addOperation(priority: nil, barrier: barrier) {
 			let conn = try await provider()
@@ -73,7 +73,7 @@ extension QueuedRemoteXPCService {
 
 	public func addDiscardingErrorOperation(
 		barrier: Bool = false,
-		operation: @escaping (Service, @escaping (Error?) -> Void) -> Void
+		operation: @escaping (Service, @escaping @Sendable (Error?) -> Void) -> Void
 	) {
 		queue.addOperation(priority: nil, barrier: barrier) {
 			let conn = try await provider()
@@ -86,7 +86,7 @@ extension QueuedRemoteXPCService {
 
 	public func addValueErrorOperation<Value: Sendable>(
 		barrier: Bool = false,
-		operation: @escaping (Service, @escaping (Value?, Error?) -> Void) -> Void
+		operation: @escaping (Service, @escaping @Sendable (Value?, Error?) -> Void) -> Void
 	) async throws -> Value {
 		let task: Task<Value, Error> = queue.addOperation(priority: nil, barrier: barrier) {
 			let conn = try await provider()
@@ -101,7 +101,7 @@ extension QueuedRemoteXPCService {
 
 	public func addDecodingOperation<Value: Sendable & Decodable>(
 		barrier: Bool = false,
-		operation: @escaping (Service, @escaping (Data?, Error?) -> Void) -> Void
+		operation: @escaping (Service, @escaping @Sendable (Data?, Error?) -> Void) -> Void
 	) async throws -> Value {
 		let task: Task<Value, Error> = queue.addOperation(priority: nil, barrier: barrier) {
 			let conn = try await provider()
