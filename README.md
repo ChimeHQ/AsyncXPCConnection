@@ -19,6 +19,7 @@ You might be tempted to just make your XPC interface functions async. While the 
 Given an XPC service like this:
 
 ```swift
+@objc
 protocol XPCService {
     func method()
     func errorMethod(reply: (Error?) -> Void)
@@ -67,7 +68,7 @@ You can also make use of the `RemoteXPCService` type, which will remove the need
 let conn = NSXPCConnection()
 let remote = RemoteXPCService<XPCService>(connection: conn, remoteInterface: XPCService.self)
 
-let decodedValue = try await conn.withDecodingCompletion { service, handler in
+let decodedValue = try await remote.withDecodingCompletion { service, handler in
     service.dataAndErrorMethod(reply: handler)
 }
 ```
