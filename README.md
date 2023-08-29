@@ -12,7 +12,7 @@ Features:
 - `RemoteXPCService` for easier type-safety
 - `QueuedRemoteXPCService` for message ordering control
 
-You might be tempted to just make your XPC interface functions async. While the compiler does suppor this, it is very unsafe. This approach does not handle connection failures and will results in hangs.
+You might be tempted to just make your XPC interface functions async. While the compiler does support this, it is very unsafe. This approach does not handle connection failures and will results in hangs.
 
 ## Usage
 
