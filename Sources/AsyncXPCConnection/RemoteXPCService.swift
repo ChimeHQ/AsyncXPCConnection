@@ -45,7 +45,7 @@ extension RemoteXPCService {
 
 extension RemoteXPCService {
 	@_unsafeInheritExecutor
-	public func withValueErrorCompletion<Value>(
+	public func withValueErrorCompletion<Value: Sendable>(
 		function: String = #function,
 		_ body: (Service, @escaping (Value?, Error?) -> Void) -> Void
 	) async throws -> Value {
@@ -53,7 +53,7 @@ extension RemoteXPCService {
 	}
 
 	@_unsafeInheritExecutor
-	public func withResultCompletion<Value>(
+	public func withResultCompletion<Value: Sendable>(
 		function: String = #function,
 		_ body: (Service, @escaping (Result<Value, Error>) -> Void) -> Void
 	) async throws -> Value {

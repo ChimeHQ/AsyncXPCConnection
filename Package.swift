@@ -1,4 +1,4 @@
-// swift-tools-version: 5.5
+// swift-tools-version: 5.8
 import PackageDescription
 
 let package = Package(
@@ -12,3 +12,13 @@ let package = Package(
 		.testTarget(name: "AsyncXPCConnectionTests", dependencies: ["AsyncXPCConnection"]),
 	]
 )
+
+let swiftSettings: [SwiftSetting] = [
+    .enableExperimentalFeature("StrictConcurrency")
+]
+
+for target in package.targets {
+    var settings = target.swiftSettings ?? []
+    settings.append(contentsOf: swiftSettings)
+    target.swiftSettings = settings
+}
