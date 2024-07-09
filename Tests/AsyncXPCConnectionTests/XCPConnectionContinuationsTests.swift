@@ -14,5 +14,17 @@ final class XCPConnectionContinuationTests: XCTestCase {
 
 		XCTAssertEqual(value, 42)
 	}
+
+	func testWithResultCompletion() async throws {
+		let conn = NSXPCConnection()
+
+		conn.remoteObjectInterface = NSXPCInterface(with: XPCProtocol.self)
+
+		let value = try await conn.withResultCompletion { (service: XPCProtocol, handler: (Result<Int, Error>) -> Void) in
+			handler(.success(42))
+		}
+
+		XCTAssertEqual(value, 42)
+	}
 }
 
