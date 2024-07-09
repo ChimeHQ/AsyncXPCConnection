@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'README.md'
+      - 'CODE_OF_CONDUCT.md'
+      - '.editorconfig'
+      - '.spi.yml'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Test
+    runs-on: macOS-14
+    strategy:
+      matrix:
+        developer_dir:
+          - /Applications/Xcode_15.4.app/Contents/Developer
+          - /Applications/Xcode_16_0.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test
+        env:
+          DEVELOPER_DIR: ${{ matrix.developer_dir }}
+        run: set -o pipefail && xcodebuild -scheme AsyncXPCConnection -destination "platform=macOS" test | xcbeautify
