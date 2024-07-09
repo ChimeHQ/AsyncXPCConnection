@@ -1,5 +1,6 @@
 <div align="center">
 
+[![Build Status][build status badge]][build status]
 [![Platforms][platforms badge]][platforms]
 [![Documentation][documentation badge]][documentation]
 [![Matrix][matrix badge]][matrix]
@@ -115,6 +116,8 @@ I prefer indentation with tabs for improved accessibility. But, I'd rather you u
 
 By participating in this project you agree to abide by the [Contributor Code of Conduct](CODE_OF_CONDUCT.md).
 
+[build status]: https://github.com/ChimeHQ/AsyncXPCConnection/actions
+[build status badge]: https://github.com/ChimeHQ/AsyncXPCConnection/workflows/CI/badge.svg
 [platforms]: https://swiftpackageindex.com/ChimeHQ/AsyncXPCConnection
 [platforms badge]: https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FChimeHQ%2FAsyncXPCConnection%2Fbadge%3Ftype%3Dplatforms
 [documentation]: https://swiftpackageindex.com/ChimeHQ/AsyncXPCConnection/main/documentation
