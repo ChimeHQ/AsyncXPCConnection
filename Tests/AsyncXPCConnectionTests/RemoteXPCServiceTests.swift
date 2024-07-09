@@ -6,10 +6,14 @@ import AsyncXPCConnection
 }
 
 final class RemoteXPCServiceTests: XCTestCase {
-    func testRemoteProtocolInit() throws {
+    func testWithContinuation() async throws {
 		let conn = NSXPCConnection()
-		let _ = RemoteXPCService<XPCProtocol>(connection: conn, remoteInterface: XPCProtocol.self)
+		let service = RemoteXPCService<XPCProtocol>(connection: conn, remoteInterface: XPCProtocol.self)
 
-		XCTAssertTrue(true)
+		let value = try await service.withContinuation { (_, continuation: CheckedContinuation<Int, Error>) in
+			continuation.resume(returning: 42)
+		}
+
+		XCTAssertEqual(value, 42)
     }
 }
