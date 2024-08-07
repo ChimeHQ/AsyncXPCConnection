@@ -29,11 +29,11 @@ extension NSXPCConnection {
 #else
 	/// Begins remote method invocation that returns a value.
 	public func withContinuation<Service, Value>(
+		isolation: isolated (any Actor)? = #isolation,
 		function: String = #function,
-		isolation actor: isolated (any Actor)? = #isolation,
 		_ body: (Service, CheckedContinuation<Value, Error>) -> Void
 	) async throws -> Value {
-		try await withCheckedThrowingContinuation(function: function) { continuation in
+		try await withCheckedThrowingContinuation(isolation: isolation, function: function) { continuation in
 			let proxy = self.remoteObjectProxyWithErrorHandler { error in
 				continuation.resume(throwing: error)
 			}
@@ -49,7 +49,7 @@ extension NSXPCConnection {
 #endif
 
 #if compiler(>=6.0)
-	@available(*, deprecated, message: "please use withContinuation(function:isolation:_:)")
+	@available(*, deprecated, message: "please use withContinuation(isolation:function:_:)")
 #endif
 	/// Begins remote method invocation that returns a value.
 	public func withContinuation<Service, Value>(
@@ -95,11 +95,11 @@ extension NSXPCConnection {
 	///
 	/// Even though the remote call does not return errors, this function still throws because communication can always fail.
 	public func withService<Service>(
+		isolation: isolated (any Actor)? = #isolation,
 		function: String = #function,
-		isolation actor: isolated (any Actor)? = #isolation,
 		_ body: (Service) throws -> Void
 	) async throws {
-		try await withContinuation(function: function, isolation: actor, { (service: Service, continuation: CheckedContinuation<Void, Error>) in
+		try await withContinuation(isolation: isolation, function: function, { (service: Service, continuation: CheckedContinuation<Void, Error>) in
 			do {
 				try body(service)
 
@@ -115,7 +115,7 @@ extension NSXPCConnection {
 	///
 	/// Even though the remote call does not return errors, this function still throws because communication can always fail.
 #if compiler(>=6.0)
-	@available(*, deprecated, message: "please use withService(function:isolation:_:)")
+	@available(*, deprecated, message: "please use withService(isolation:function:_:)")
 #endif
 	public func withService<Service>(
 		function: String = #function,
@@ -165,11 +165,11 @@ extension NSXPCConnection {
 	/// This function always throws if an error is returned from the completion handler.
 	/// > Note: The `Value: Sendable` should not be required...
 	public func withValueErrorCompletion<Service, Value: Sendable>(
+		isolation: isolated (any Actor)? = #isolation,
 		function: String = #function,
-		isolation actor: isolated (any Actor)? = #isolation,
-		_ body: (Service, @escaping (sending Value?, Error?) -> Void) -> Void
-	) async throws -> sending Value {
-		try await withContinuation(function: function, isolation: actor) { service, continuation in
+		_ body: (Service, @escaping (Value?, Error?) -> Void) -> Void
+	) async throws -> Value {
+		try await withContinuation(isolation: isolation, function: function) { service, continuation in
 			body(service) { value, error in
 				switch (value, error) {
 				case let (value?, nil):
@@ -190,7 +190,7 @@ extension NSXPCConnection {
 	///
 	/// This function always throws if an error is returned from the completion handler.
 #if compiler(>=6.0)
-	@available(*, deprecated, message: "please use withValueErrorCompletion(function:isolation:_:)")
+	@available(*, deprecated, message: "please use withValueErrorCompletion(isolation:function:_:)")
 #endif
 	public func withValueErrorCompletion<Service, Value: Sendable>(
 		function: String = #function,
@@ -230,11 +230,11 @@ extension NSXPCConnection {
 	/// Begins remote method invocation that calls out to a Result-based completion handler.
 	/// > Note: The `Value: Sendable` should not be required...
 	public func withResultCompletion<Service, Value: Sendable>(
+		isolation: isolated (any Actor)? = #isolation,
 		function: String = #function,
-		isolation actor: isolated (any Actor)? = #isolation,
-		_ body: (Service, @escaping (sending Result<Value, Error>) -> Void) -> Void
-	) async throws -> sending Value {
-		try await withContinuation(function: function, isolation: actor) { service, continuation in
+		_ body: (Service, @escaping (Result<Value, Error>) -> Void) -> Void
+	) async throws -> Value {
+		try await withContinuation(isolation: isolation, function: function) { service, continuation in
 			body(service) { result in
 				continuation.resume(with: result)
 			}
@@ -244,7 +244,7 @@ extension NSXPCConnection {
 
 	/// Begins remote method invocation that calls out to a Result-based completion handler.
 #if compiler(>=6.0)
-	@available(*, deprecated, message: "please use withResultCompletion(function:isolation:_:)")
+	@available(*, deprecated, message: "please use withResultCompletion(isolation:function:_:)")
 #endif
 	public func withResultCompletion<Service, Value: Sendable>(
 		function: String = #function,
@@ -278,11 +278,11 @@ extension NSXPCConnection {
 #else
 	/// Begins remote method invocation that calls out to a failable completion handler.
 	public func withErrorCompletion<Service>(
+		isolation: isolated (any Actor)? = #isolation,
 		function: String = #function,
-		isolation actor: isolated (any Actor)? = #isolation,
-		_ body: (Service, @escaping @Sendable (Error?) -> Void) -> Void
+		_ body: (Service, @escaping (Error?) -> Void) -> Void
 	) async throws {
-		try await withContinuation(function: function, isolation: actor) { (service, continuation: CheckedContinuation<Void, Error>) in
+		try await withContinuation(isolation: isolation, function: function) { (service, continuation: CheckedContinuation<Void, Error>) in
 			body(service) { error in
 				if let error = error {
 					continuation.resume(throwing: error)
@@ -296,7 +296,7 @@ extension NSXPCConnection {
 
 	/// Begins remote method invocation that calls out to a failable completion handler.
 #if compiler(>=6.0)
-	@available(*, deprecated, message: "please use withErrorCompletion(function:isolation:_:)")
+	@available(*, deprecated, message: "please use withErrorCompletion(isolation:function:_:)")
 #endif
 	public func withErrorCompletion<Service>(
 		function: String = #function,
@@ -328,11 +328,11 @@ extension NSXPCConnection {
 	}
 #else
 	public func withDecodingCompletion<Service, Value: Decodable>(
+		isolation: isolated (any Actor)? = #isolation,
 		function: String = #function,
-		isolation actor: isolated (any Actor)? = #isolation,
 		_ body: (Service, @escaping (Data?, Error?) -> Void) -> Void
-	) async throws -> sending Value {
-		let data: Data = try await withValueErrorCompletion(function: function, isolation: actor) { service, handler in
+	) async throws -> Value {
+		let data: Data = try await withValueErrorCompletion(isolation: isolation, function: function) { service, handler in
 			body(service, handler)
 		}
 
@@ -341,7 +341,7 @@ extension NSXPCConnection {
 #endif
 
 #if compiler(>=6.0)
-	@available(*, deprecated, message: "please use withDecodingCompletion(function:isolation:_:)")
+	@available(*, deprecated, message: "please use withDecodingCompletion(isolation:function:_:)")
 #endif
 	public func withDecodingCompletion<Service, Value: Decodable>(
 		function: String = #function,
