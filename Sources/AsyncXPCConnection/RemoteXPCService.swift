@@ -126,6 +126,5 @@ extension RemoteXPCService {
 	) async throws -> Value {
 		try await connection.withDecodingCompletion(isolation: isolation, function: function, body)
 	}
-
 #endif
 }
