@@ -108,7 +108,7 @@ let value = try await queuedService.addDecodingOperation { service, handler in
 
 ## Contributing and Collaboration
 
-I would love to hear from you! Issues or pull requests work great. A [Matrix space][matrix] is also available for live help, but I have a strong bias towards answering in the form of documentation.
+I would love to hear from you! Issues or pull requests work great. Both a [Matrix space][matrix] and [Discord][discord] are available for live help, but I have a strong bias towards answering in the form of documentation. You can also find me on [mastodon](https://mastodon.social/@mattiem).
 
 I prefer collaboration, and would love to find ways to work together if you have a similar project.
 
@@ -124,4 +124,5 @@ By participating in this project you agree to abide by the [Contributor Code of 
 [documentation badge]: https://img.shields.io/badge/Documentation-DocC-blue
 [matrix]: https://matrix.to/#/%23chimehq%3Amatrix.org
 [matrix badge]: https://img.shields.io/matrix/chimehq%3Amatrix.org?label=Matrix
+[discord]: https://discord.gg/esFpX6sErJ
 [queue]: https://github.com/mattmassicotte/Queue
