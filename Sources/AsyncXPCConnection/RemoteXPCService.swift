@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 
 /// A thin wrapper around NSXPCConnection with a defined service type.
@@ -88,11 +89,12 @@ extension RemoteXPCService {
 	}
 
 	@_unsafeInheritExecutor
-	public func withDecodingCompletion<Value: Decodable>(
+	public func withDecodingCompletion<Value: Decodable, Decoder: TopLevelDecoder>(
 		function: String = #function,
+		using decoder: Decoder = JSONDecoder(),
 		_ body: (Service, @escaping (Data?, Error?) -> Void) -> Void
-	) async throws -> Value {
-		try await connection.withDecodingCompletion(function: function, body)
+	) async throws -> Value where Decoder.Input == Data {
+		try await connection.withDecodingCompletion(function: function, using: decoder, body)
 	}
 #else
 	public func withValueErrorCompletion<Value: Sendable>(
@@ -119,12 +121,13 @@ extension RemoteXPCService {
 		try await connection.withErrorCompletion(isolation: isolation, function: function, body)
 	}
 
-	public func withDecodingCompletion<Value: Decodable>(
+	public func withDecodingCompletion<Value: Decodable, Decoder: TopLevelDecoder>(
 		isolation: isolated (any Actor)? = #isolation,
 		function: String = #function,
+		using decoder: Decoder = JSONDecoder(),
 		_ body: (Service, @escaping (Data?, Error?) -> Void) -> Void
-	) async throws -> Value {
-		try await connection.withDecodingCompletion(isolation: isolation, function: function, body)
+	) async throws -> Value where Decoder.Input == Data {
+		try await connection.withDecodingCompletion(isolation: isolation, function: function, using: decoder, body)
 	}
 #endif
 }

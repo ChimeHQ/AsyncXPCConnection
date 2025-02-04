@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 
 public protocol AsyncQueuing {
@@ -109,14 +110,15 @@ extension QueuedRemoteXPCService {
 		return try await task.value
 	}
 
-	public func addDecodingOperation<Value: Sendable & Decodable>(
+	public func addDecodingOperation<Value: Sendable & Decodable, Decoder: TopLevelDecoder>(
 		barrier: Bool = false,
+		using decoder: Decoder = JSONDecoder(),
 		operation: @escaping (Service, @escaping ValueErrorOperationHandler<Data>) -> Void
-	) async throws -> Value {
+	) async throws -> Value where Decoder.Input == Data {
 		let task: Task<Value, Error> = queue.addOperation(priority: nil, barrier: barrier) {
 			let conn = try await provider()
 
-			return try await conn.withDecodingCompletion { service, handler in
+			return try await conn.withDecodingCompletion(using: decoder) { service, handler in
 				operation(service, handler)
 			}
 		}
