@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 
 enum ConnectionContinuationError: Error {
@@ -316,42 +317,45 @@ extension NSXPCConnection {
 
 #if compiler(<6.0)
 	@_unsafeInheritExecutor
-	public func withDecodingCompletion<Service, Value: Decodable>(
+	public func withDecodingCompletion<Service, Value: Decodable, Decoder: TopLevelDecoder>(
 		function: String = #function,
+		using decoder: Decoder = JSONDecoder(),
 		_ body: (Service, @escaping @Sendable (Data?, Error?) -> Void) -> Void
-	) async throws -> Value {
+	) async throws -> Value where Decoder.Input == Data {
 		let data: Data = try await withValueErrorCompletion(function: function) { service, handler in
 			body(service, handler)
 		}
 
-		return try JSONDecoder().decode(Value.self, from: data)
+		return try decoder.decode(Value.self, from: data)
 	}
 #else
-	public func withDecodingCompletion<Service, Value: Decodable>(
+	public func withDecodingCompletion<Service, Value: Decodable, Decoder: TopLevelDecoder>(
 		isolation: isolated (any Actor)? = #isolation,
 		function: String = #function,
+		using decoder: Decoder = JSONDecoder(),
 		_ body: (Service, @escaping (Data?, Error?) -> Void) -> Void
-	) async throws -> Value {
+	) async throws -> Value where Decoder.Input == Data {
 		let data: Data = try await withValueErrorCompletion(isolation: isolation, function: function) { service, handler in
 			body(service, handler)
 		}
 
-		return try JSONDecoder().decode(Value.self, from: data)
+		return try decoder.decode(Value.self, from: data)
 	}
 #endif
 
 #if compiler(>=6.0)
-	@available(*, deprecated, message: "please use withDecodingCompletion(isolation:function:_:)")
+	@available(*, deprecated, message: "please use withDecodingCompletion(isolation:function:using:_:)")
 #endif
-	public func withDecodingCompletion<Service, Value: Decodable>(
+	public func withDecodingCompletion<Service, Value: Decodable, Decoder: TopLevelDecoder>(
 		function: String = #function,
 		on actor: isolated some Actor,
+		using decoder: Decoder = JSONDecoder(),
 		_ body: (Service, @escaping @Sendable (Data?, Error?) -> Void) -> Void
-	) async throws -> Value {
+	) async throws -> Value where Decoder.Input == Data {
 		let data: Data = try await withValueErrorCompletion(function: function, on: actor) { service, handler in
 			body(service, handler)
 		}
 
-		return try JSONDecoder().decode(Value.self, from: data)
+		return try decoder.decode(Value.self, from: data)
 	}
 }
