@@ -21,7 +21,7 @@ jobs:
       matrix:
         developer_dir:
           - "/Applications/Xcode_15.4.app/Contents/Developer"
-          - "/Applications/Xcode_16.1_beta.app/Contents/Developer"
+          - "/Applications/Xcode_16.1.app/Contents/Developer"
     steps:
       - uses: actions/checkout@v4
       - name: Test
