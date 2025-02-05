@@ -168,7 +168,7 @@ extension NSXPCConnection {
 	public func withValueErrorCompletion<Service, Value: Sendable>(
 		isolation: isolated (any Actor)? = #isolation,
 		function: String = #function,
-		_ body: (Service, @escaping (Value?, Error?) -> Void) -> Void
+		_ body: (Service, sending @escaping (Value?, Error?) -> Void) -> Void
 	) async throws -> Value {
 		try await withContinuation(isolation: isolation, function: function) { service, continuation in
 			body(service) { value, error in
@@ -233,7 +233,7 @@ extension NSXPCConnection {
 	public func withResultCompletion<Service, Value: Sendable>(
 		isolation: isolated (any Actor)? = #isolation,
 		function: String = #function,
-		_ body: (Service, @escaping (Result<Value, Error>) -> Void) -> Void
+		_ body: (Service, sending @escaping (Result<Value, Error>) -> Void) -> Void
 	) async throws -> Value {
 		try await withContinuation(isolation: isolation, function: function) { service, continuation in
 			body(service) { result in
@@ -281,7 +281,7 @@ extension NSXPCConnection {
 	public func withErrorCompletion<Service>(
 		isolation: isolated (any Actor)? = #isolation,
 		function: String = #function,
-		_ body: (Service, @escaping (Error?) -> Void) -> Void
+		_ body: (Service, sending @escaping (Error?) -> Void) -> Void
 	) async throws {
 		try await withContinuation(isolation: isolation, function: function) { (service, continuation: CheckedContinuation<Void, Error>) in
 			body(service) { error in
@@ -333,7 +333,7 @@ extension NSXPCConnection {
 		isolation: isolated (any Actor)? = #isolation,
 		function: String = #function,
 		using decoder: Decoder = JSONDecoder(),
-		_ body: (Service, @escaping (Data?, Error?) -> Void) -> Void
+		_ body: (Service, sending @escaping (Data?, Error?) -> Void) -> Void
 	) async throws -> Value where Decoder.Input == Data {
 		let data: Data = try await withValueErrorCompletion(isolation: isolation, function: function) { service, handler in
 			body(service, handler)

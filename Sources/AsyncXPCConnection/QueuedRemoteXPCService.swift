@@ -54,7 +54,7 @@ extension QueuedRemoteXPCService {
 
 	public func addResultOperation<Value: Sendable>(
 		barrier: Bool = false,
-		operation: @escaping (Service, @escaping ResultOperationHandler<Value>) -> Void
+		operation: @escaping (Service, sending @escaping ResultOperationHandler<Value>) -> Void
 	) async throws -> Value {
 		let task: Task<Value, Error> = queue.addOperation(priority: nil, barrier: barrier) {
 			let conn = try await provider()
@@ -69,7 +69,7 @@ extension QueuedRemoteXPCService {
 
 	public func addErrorOperation(
 		barrier: Bool = false,
-		operation: @escaping (Service, @escaping ErrorOperationHandler) -> Void
+		operation: @escaping (Service, sending @escaping ErrorOperationHandler) -> Void
 	) async throws {
 		let task: Task<Void, Error> = queue.addOperation(priority: nil, barrier: barrier) {
 			let conn = try await provider()
@@ -84,7 +84,7 @@ extension QueuedRemoteXPCService {
 
 	public func addDiscardingErrorOperation(
 		barrier: Bool = false,
-		operation: @escaping (Service, @escaping ErrorOperationHandler) -> Void
+		operation: @escaping (Service, sending @escaping ErrorOperationHandler) -> Void
 	) {
 		queue.addOperation(priority: nil, barrier: barrier) {
 			let conn = try await provider()
@@ -97,7 +97,7 @@ extension QueuedRemoteXPCService {
 
 	public func addValueErrorOperation<Value: Sendable>(
 		barrier: Bool = false,
-		operation: @escaping (Service, @escaping ValueErrorOperationHandler<Value>) -> Void
+		operation: @escaping (Service, sending @escaping ValueErrorOperationHandler<Value>) -> Void
 	) async throws -> Value {
 		let task: Task<Value, Error> = queue.addOperation(priority: nil, barrier: barrier) {
 			let conn = try await provider()
@@ -113,7 +113,7 @@ extension QueuedRemoteXPCService {
 	public func addDecodingOperation<Value: Sendable & Decodable, Decoder: TopLevelDecoder>(
 		barrier: Bool = false,
 		using decoder: Decoder = JSONDecoder(),
-		operation: @escaping (Service, @escaping ValueErrorOperationHandler<Data>) -> Void
+		operation: @escaping (Service, sending @escaping ValueErrorOperationHandler<Data>) -> Void
 	) async throws -> Value where Decoder.Input == Data {
 		let task: Task<Value, Error> = queue.addOperation(priority: nil, barrier: barrier) {
 			let conn = try await provider()
