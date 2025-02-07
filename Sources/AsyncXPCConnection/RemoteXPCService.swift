@@ -100,7 +100,7 @@ extension RemoteXPCService {
 	public func withValueErrorCompletion<Value: Sendable>(
 		isolation: isolated (any Actor)? = #isolation,
 		function: String = #function,
-		_ body: (Service, @escaping (Value?, Error?) -> Void) -> Void
+		_ body: (Service, sending @escaping (Value?, Error?) -> Void) -> Void
 	) async throws -> Value {
 		try await connection.withValueErrorCompletion(isolation: isolation, function: function, body)
 	}
@@ -108,7 +108,7 @@ extension RemoteXPCService {
 	public func withResultCompletion<Value: Sendable>(
 		isolation: isolated (any Actor)? = #isolation,
 		function: String = #function,
-		_ body: (Service, @escaping (Result<Value, Error>) -> Void) -> Void
+		_ body: (Service, sending @escaping (Result<Value, Error>) -> Void) -> Void
 	) async throws -> Value {
 		try await connection.withResultCompletion(isolation: isolation, function: function, body)
 	}
@@ -116,7 +116,7 @@ extension RemoteXPCService {
 	public func withErrorCompletion(
 		isolation: isolated (any Actor)? = #isolation,
 		function: String = #function,
-		_ body: (Service, @escaping (Error?) -> Void) -> Void
+		_ body: (Service, sending @escaping (Error?) -> Void) -> Void
 	) async throws {
 		try await connection.withErrorCompletion(isolation: isolation, function: function, body)
 	}
@@ -125,7 +125,7 @@ extension RemoteXPCService {
 		isolation: isolated (any Actor)? = #isolation,
 		function: String = #function,
 		using decoder: Decoder = JSONDecoder(),
-		_ body: (Service, @escaping (Data?, Error?) -> Void) -> Void
+		_ body: (Service, sending @escaping (Data?, Error?) -> Void) -> Void
 	) async throws -> Value where Decoder.Input == Data {
 		try await connection.withDecodingCompletion(isolation: isolation, function: function, using: decoder, body)
 	}
