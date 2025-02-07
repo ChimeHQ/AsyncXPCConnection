@@ -42,15 +42,9 @@ extension QueuedRemoteXPCService {
 }
 
 extension QueuedRemoteXPCService {
-#if compiler(<6.0)
-	public typealias ResultOperationHandler<Value> = @Sendable (Result<Value, Error>) -> Void
-	public typealias ErrorOperationHandler = @Sendable (Error?) -> Void
-	public typealias ValueErrorOperationHandler<Value> = @Sendable (Value?, Error?) -> Void
-#else
 	public typealias ResultOperationHandler<Value> = (Result<Value, Error>) -> Void
 	public typealias ErrorOperationHandler = (Error?) -> Void
 	public typealias ValueErrorOperationHandler<Value> = (Value?, Error?) -> Void
-#endif
 
 	public func addResultOperation<Value: Sendable>(
 		barrier: Bool = false,
