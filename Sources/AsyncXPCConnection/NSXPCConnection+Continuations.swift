@@ -160,6 +160,26 @@ extension NSXPCConnection {
 			}
 		}
 	}
+
+	/// Begins remote method invocation that calls out to an optional value-error pair completion handler.
+	///
+	/// This function always throws if an error is returned from the completion handler.
+	@_unsafeInheritExecutor
+	public func withOptionalValueErrorCompletion<Service, Value: Sendable>(
+		function: String = #function,
+		_ body: (Service, @escaping @Sendable (Value?, Error?) -> Void) -> Void
+	) async throws -> Value? {
+		try await withContinuation(function: function) { service, continuation in
+			body(service) { value, error in
+				switch (value, error) {
+				case let (_, error?):
+					continuation.resume(throwing: error)
+				case let (value, nil):
+					continuation.resume(returning: value)
+				}
+			}
+		}
+	}
 #else
 	/// Begins remote method invocation that calls out to a value-error pair completion handler.
 	///
@@ -181,6 +201,27 @@ extension NSXPCConnection {
 					continuation.resume(throwing: error)
 				case (nil, nil):
 					continuation.resume(throwing: ConnectionContinuationError.missingBothValueAndError)
+				}
+			}
+		}
+	}
+
+	/// Begins remote method invocation that calls out to an optional value-error pair completion handler.
+	///
+	/// This function always throws if an error is returned from the completion handler.
+	/// > Note: The `Value: Sendable` should not be required...
+	public func withOptionalValueErrorCompletion<Service, Value: Sendable>(
+		isolation: isolated (any Actor)? = #isolation,
+		function: String = #function,
+		_ body: (Service, sending @escaping (Value?, Error?) -> Void) -> Void
+	) async throws -> Value? {
+		try await withContinuation(isolation: isolation, function: function) { service, continuation in
+			body(service) { value, error in
+				switch (value, error) {
+				case let (_, error?):
+					continuation.resume(throwing: error)
+				case let (value, nil):
+					continuation.resume(returning: value)
 				}
 			}
 		}
@@ -328,6 +369,21 @@ extension NSXPCConnection {
 
 		return try decoder.decode(Value.self, from: data)
 	}
+
+	@_unsafeInheritExecutor
+	public func withOptionalDecodingCompletion<Service, Value: Decodable, Decoder: TopLevelDecoder>(
+		function: String = #function,
+		using decoder: Decoder = JSONDecoder(),
+		_ body: (Service, @escaping @Sendable (Data?, Error?) -> Void) -> Void
+	) async throws -> Value? where Decoder.Input == Data {
+		guard let data: Data = try await withOptionalValueErrorCompletion(function: function, { service, handler in
+			body(service, handler)
+		}) else {
+			return nil
+		}
+
+		return try decoder.decode(Value.self, from: data)
+	}
 #else
 	public func withDecodingCompletion<Service, Value: Decodable, Decoder: TopLevelDecoder>(
 		isolation: isolated (any Actor)? = #isolation,
@@ -337,6 +393,21 @@ extension NSXPCConnection {
 	) async throws -> Value where Decoder.Input == Data {
 		let data: Data = try await withValueErrorCompletion(isolation: isolation, function: function) { service, handler in
 			body(service, handler)
+		}
+
+		return try decoder.decode(Value.self, from: data)
+	}
+
+	public func withOptionalDecodingCompletion<Service, Value: Decodable, Decoder: TopLevelDecoder>(
+		isolation: isolated (any Actor)? = #isolation,
+		function: String = #function,
+		using decoder: Decoder = JSONDecoder(),
+		_ body: (Service, sending @escaping (Data?, Error?) -> Void) -> Void
+	) async throws -> Value? where Decoder.Input == Data {
+		guard let data: Data = try await withOptionalValueErrorCompletion(isolation: isolation, function: function, { service, handler in
+			body(service, handler)
+		}) else {
+			return nil
 		}
 
 		return try decoder.decode(Value.self, from: data)

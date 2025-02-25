@@ -73,6 +73,14 @@ extension RemoteXPCService {
 	}
 
 	@_unsafeInheritExecutor
+	public func withOptionalValueErrorCompletion<Value: Sendable>(
+		function: String = #function,
+		_ body: (Service, @escaping (Value?, Error?) -> Void) -> Void
+	) async throws -> Value? {
+		try await connection.withOptionalValueErrorCompletion(function: function, body)
+	}
+
+	@_unsafeInheritExecutor
 	public func withResultCompletion<Value: Sendable>(
 		function: String = #function,
 		_ body: (Service, @escaping (Result<Value, Error>) -> Void) -> Void
@@ -96,6 +104,15 @@ extension RemoteXPCService {
 	) async throws -> Value where Decoder.Input == Data {
 		try await connection.withDecodingCompletion(function: function, using: decoder, body)
 	}
+
+	@_unsafeInheritExecutor
+	public func withOptionalDecodingCompletion<Value: Decodable, Decoder: TopLevelDecoder>(
+		function: String = #function,
+		using decoder: Decoder = JSONDecoder(),
+		_ body: (Service, @escaping (Data?, Error?) -> Void) -> Void
+	) async throws -> Value? where Decoder.Input == Data {
+		try await connection.withOptionalDecodingCompletion(function: function, using: decoder, body)
+	}
 #else
 	public func withValueErrorCompletion<Value: Sendable>(
 		isolation: isolated (any Actor)? = #isolation,
@@ -103,6 +120,14 @@ extension RemoteXPCService {
 		_ body: (Service, sending @escaping (Value?, Error?) -> Void) -> Void
 	) async throws -> Value {
 		try await connection.withValueErrorCompletion(isolation: isolation, function: function, body)
+	}
+
+	public func withOptionalValueErrorCompletion<Value: Sendable>(
+		isolation: isolated (any Actor)? = #isolation,
+		function: String = #function,
+		_ body: (Service, sending @escaping (Value?, Error?) -> Void) -> Void
+	) async throws -> Value? {
+		try await connection.withOptionalValueErrorCompletion(isolation: isolation, function: function, body)
 	}
 
 	public func withResultCompletion<Value: Sendable>(
@@ -128,6 +153,15 @@ extension RemoteXPCService {
 		_ body: (Service, sending @escaping (Data?, Error?) -> Void) -> Void
 	) async throws -> Value where Decoder.Input == Data {
 		try await connection.withDecodingCompletion(isolation: isolation, function: function, using: decoder, body)
+	}
+
+	public func withOptionalDecodingCompletion<Value: Decodable, Decoder: TopLevelDecoder>(
+		isolation: isolated (any Actor)? = #isolation,
+		function: String = #function,
+		using decoder: Decoder = JSONDecoder(),
+		_ body: (Service, sending @escaping (Data?, Error?) -> Void) -> Void
+	) async throws -> Value? where Decoder.Input == Data {
+		try await connection.withOptionalDecodingCompletion(isolation: isolation, function: function, using: decoder, body)
 	}
 #endif
 }
